@@ -1,0 +1,338 @@
+<?php
+
+include_once('../define/define.php');
+include_once(login .'connect.php');
+if (!isset($_SESSION['login'])) {
+  header("location:".login."login.php");
+  exit();
+}
+if(isset($_REQUEST['submit']))
+
+{
+    $name = $_REQUEST['Name'];
+    $mob = $_REQUEST['Mobile'];
+    if (empty($name)  || trim($name) === '') {
+        $err['nerror'] = "Name is Required";
+      } else if (!preg_match("/^[a-zA-Z ]*$/", $name)) {
+        $err['nerror'] = "Only alphabets and white space are allowed";
+      }
+    
+    
+    
+      if (empty($mob)) {
+        $err['moberror'] = "Number is Required";
+      } else if (!preg_match('/^[0-9]{10}+$/', $mob)) {
+        $err['moberror'] = "Invalid Number Format";
+      }
+     
+}
+if(isset($_REQUEST['clear']))
+{
+    $_REQUEST['Name']='';
+    $_REQUEST['Mobile']='';
+}
+
+?>
+
+
+
+
+
+
+
+
+
+<?php
+$title="User Prescription";
+ include_once(nav.'header.php');
+?>
+
+<body class="hold-transition sidebar-mini">
+  <div class="wrapper">
+    <!-- Navbar -->
+    
+<?php include_once(nav.'rightnav.php');
+include_once(nav.'leftnav.php');
+
+?>
+
+    
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+      <!-- Content Header (Page header) -->
+      <section class="content-header">
+        <div class="container-fluid">
+          <div class="row mb-2">
+            <div class="col-sm-6">
+              <h1>User Prescription Report</h1>
+            </div>
+            <div class="col-sm-6">
+              <ol class="breadcrumb float-sm-right">
+                <li class="breadcrumb-item"><a href="<?php echo login; ?>index3.php">Home</a></li>
+                <li class="breadcrumb-item active">User Prescription Report</li>
+              </ol>
+            </div>
+          </div>
+        </div><!-- /.container-fluid -->
+      </section>
+
+      <!-- Main content -->
+      <section class="content">
+      <div class="container-fluid" >
+        <div class="row">
+          <!-- left column -->
+          <div class="col-md-6">
+            <!-- general form elements -->
+            <div class="card card-primary" style="width:1500px">
+             
+              <!-- /.card-header -->
+              <!-- form start -->
+              <form >
+                <div class="card-body">
+                  <div class="form-group">
+                    <label for="exampleInputEmail1">Name</label>
+                    <input type="text" name="Name" class="form-control" id="exampleInputEmail1" placeholder="Enter Name" value="<?php echo (isset($_REQUEST['Name'])) ? $_REQUEST['Name'] : ''; ?>">
+                    <span style=" color: red;" class="error" id="nspan"><?php echo isset($err['nerror']) ? '**' . $err['nerror'] : ''; ?></span>
+
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleInputPassword1">Mobile</label>
+                    <input name="Mobile" type="tel" class="form-control" id="exampleInputPassword1" placeholder="Enter Number" value="<?php echo isset($_REQUEST['Mobile'])? $_REQUEST['Mobile']:''; ?>">
+                    <span style=" color: red;" class="error" id="nspan"><?php echo isset($err['moberror']) ? '**' . $err['moberror'] : ''; ?></span>
+                  </div>
+                 
+                  
+                </div>
+                <!-- /.card-body -->
+
+                <div class="card-footer" >
+                  <button type="submit"  name="submit" class="btn btn-primary">Submit</button>
+                  <button type="submit" style="background-color:darkgray;color:black"  name="clear" class="btn btn-primary">Clear</button>
+                </div>
+              </form>
+   
+  <!-- /.row -->
+
+
+  <!-- /.row -->
+
+
+
+
+  <!-- /.col -->
+
+  <!-- /.col -->
+  </div>
+
+  </div>
+
+
+
+<!-- /.col -->
+
+<!-- /.col -->
+</div>
+<?php
+if(isset($_REQUEST['submit']))
+{
+    if(empty($err))
+    {
+
+        ?>
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-12">
+
+              <!-- /.card -->
+
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Medical Prescription </h3>
+                </div>
+                <!-- /.card-header -->
+                <?php
+                  $q = "SELECT * FROM prescription Where Name='$_REQUEST[Name]' AND Mobile='$_REQUEST[Mobile]' ";
+                  $result = $conn->query($q);
+         
+                ?>
+                <div class="card-body">
+                  <table id="example1" class="table table-bordered table-striped">
+                    <thead>
+                      <tr >
+                        <th style="width:10px">S.No</th>
+                        <th style="width:50px">Name</th>
+                        <th style="width:50px">Age</th>
+                        <th style="width:50px">Mobile</th>
+                        <th style="width:50px">Symptoms</th>
+                        <th style="width:50px">Disease</th>
+                        <th style="width:50px">Prescription</th>
+                        <th style="width:50px">Tests if any</th>
+                        <th style="width:20px">Action</th>
+
+                      </tr>
+                    </thead>
+                    <?php
+                 $ro=mysqli_fetch_assoc($result);
+                 $id=1;
+                 if(!empty($ro)){
+                    ?>
+                      <tr id="body_<?php echo $ro['Id']; ?>">
+
+
+                        <td style="width:10px"><?php echo $id++; ?>
+                        </td>
+                        <td style="width:50px"><?php echo $ro['Name']; ?></td>
+                        <td style="width:50px"><?php echo $ro['Age']; ?></td>
+                        <td style="width:50px"><?php echo $ro['Mobile']; ?></td>
+                        <td style="width:50px"><?php echo $ro['Symptoms']; ?></td>
+                        <td style="width:50px"><?php echo $ro['Disease']; ?></td>
+                        <td style="width:50px"><?php echo $ro['Prescription']; ?></td>
+                        <?php
+                        if($ro['Tests']==0){
+                        ?>
+                        <td style="width:50px">No Tests Required</td>
+                        <?php 
+                        }else{
+                            $qu = "SELECT * FROM tests Where Id='$ro[Tests]'  ";
+                            $re = $conn->query($qu);
+                            $r=mysqli_fetch_assoc($re);
+                        ?>
+                         <td style="width:50px"><?php echo $r['c_name']; ?></td>
+                         <?php }}
+                           $q = "SELECT * FROM user_data WHERE Unique_id!=2";
+                           $res = $conn->query($q);
+                           while ($ro = mysqli_fetch_assoc($res)) {
+                             if ($ro['Name'] == $_SESSION['user']) {
+                        
+                              $q = "SELECT * FROM prescription Where Name='$_REQUEST[Name]' AND Mobile='$_REQUEST[Mobile]' ";
+                              $result = $conn->query($q);
+                              $ro=mysqli_fetch_assoc($result);
+               
+                         ?>
+                         <td id="editdel_<?php echo $ro['Id']; ?>"><button style="background-color:dodgerblue;color:white" id="edit_<?php echo $ro['Id']; ?>" value="<?php echo $ro['Id']; ?>" onclick="changedata(<?php echo $ro['Id']; ?>);"><i class="fas fa-pencil-alt"></i>Edit</button> <button style="background-color:red;color:white;" onclick=" return condelete()"><a style="color:aliceblue" href="delpres.php?Id=<?php echo $ro['Id']; ?>"><i class="fas fa-trash">
+                                                                </i>Delete</a></button></td>
+
+                            <?php }} ?>
+
+
+
+
+                      
+
+                      </tr>
+                  
+
+                    </tbody>
+                   
+                  </table>
+                </div>
+                <!-- /.card-body -->
+              </div>
+              <!-- /.card -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+        </div>
+
+
+
+
+
+
+        <?php
+      
+
+    }
+}
+else{
+
+}
+?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </div><!-- /.container-fluid -->
+  </section>
+  <!-- /.content -->
+
+  <a id="back-to-top" href="#" class="btn btn-primary back-to-top" role="button" aria-label="Scroll to top">
+    <i class="fas fa-chevron-up"></i>
+  </a>
+  </div>
+  <!-- /.content-wrapper -->
+<?php include_once(nav.'footer.php'); ?>
+
+</body>
+<script>
+   function condelete() {
+      var agree = confirm("Are you sure?");
+      if (agree == true) {
+        return true;
+      } else {
+        return false;
+      }
+
+    }
+
+    function changedata(id) {
+
+
+      var getID = $('#edit_' + id).val();
+
+
+
+      if (getID != '') {
+
+
+
+        $.ajax({
+          type: 'post',
+          data: {
+            user_id: getID
+          },
+          url: 'editpres.php',
+          success: function(returnData) {
+
+
+
+            $("#body_" + id).html(returnData);
+          }
+        });
+      }
+
+
+    }
+
+
+    
+    (function() {
+            var nav = document.getElementsByClassName('nav-link ');
+            var current = window.location.href;
+            // console.log(current);
+
+            for (var i = 0; i < nav.length; i++) {
+              // console.log("cu"+nav[i].href);
+              if (nav[i].href === current) {
+                nav[i].classList.add('active');
+              }
+            
+            }
+          })();
+</script>
+
+</html>
